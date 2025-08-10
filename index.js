@@ -92,6 +92,10 @@ bot.on("message:text", async (ctx) => {
 });
 
 export default async function handler(req, res) {
+  if (!bot.botInfo) {
+    await bot.init(); 
+  }
+
   if (req.method === "POST") {
     try {
       await bot.handleUpdate(req.body);
