@@ -91,8 +91,7 @@ bot.on("message:text", async (ctx) => {
   }
 });
 
-// --- Экспорт для Vercel ---
-export default bot = async (req, res) => {
+export default async function handler(req, res) {
   if (req.method === "POST") {
     try {
       await bot.handleUpdate(req.body);
@@ -104,4 +103,4 @@ export default bot = async (req, res) => {
   } else {
     res.status(200).send("Bot is running");
   }
-};
+}
