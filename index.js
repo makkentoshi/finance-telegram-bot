@@ -1,10 +1,6 @@
 import { Bot, InlineKeyboard, session } from "grammy";
 import fetch from "node-fetch";
 
-const { Bot, InlineKeyboard, session } = require("grammy");
-const fetch = require("node-fetch");
-
-
 const BOT_TOKEN = process.env.BOT_TOKEN; // TELEGRAM BOT ЧЕРЕЗ BotFather
 const DEEPSEEK_API_KEY = process.env.DEEPSEEK_API_KEY; // DEEPSEEK ИЛИ CHATGPT
 
