@@ -1,18 +1,16 @@
 import { Bot, InlineKeyboard, session } from "grammy";
 import fetch from "node-fetch";
 
-const BOT_TOKEN = process.env.BOT_TOKEN; // TELEGRAM BOT ЧЕРЕЗ BotFather
-const DEEPSEEK_API_KEY = process.env.DEEPSEEK_API_KEY; // DEEPSEEK ИЛИ CHATGPT
+const BOT_TOKEN = process.env.BOT_TOKEN; // Telegram BotFather
+const DEEPSEEK_API_KEY = process.env.DEEPSEEK_API_KEY; // DeepSeek API
 
 if (!BOT_TOKEN) throw new Error("BOT_TOKEN is required");
 
 const bot = new Bot(BOT_TOKEN);
 
-// --- Session для хранения языка ---
 function initialSession() {
   return { lang: null };
 }
-
 bot.use(session({ initial: initialSession }));
 
 // --- Сообщения на разных языках ---
@@ -34,12 +32,14 @@ const langKeyboard = new InlineKeyboard()
   .text("English", "lang_en").row()
   .text("Қазақша", "lang_kz");
 
+// --- Команда /start ---
 bot.command("start", async (ctx) => {
   await ctx.reply("Выберите язык / Choose a language / Тілді таңдаңыз:", {
     reply_markup: langKeyboard
   });
 });
 
+// --- Обработка выбора языка ---
 bot.callbackQuery(/^lang_(ru|en|kz)$/i, async (ctx) => {
   const lang = ctx.match[1];
   ctx.session.lang = lang;
@@ -52,7 +52,7 @@ function buildDeepSeekPrompt(question, lang) {
   return `You are a professional financial literacy assistant. Answer ONLY if the question is related to finance, economics, investments, personal budgeting, or money management. If the question is unrelated, politely respond in ${lang} that you can only answer financial questions. Question: ${question}`;
 }
 
-// --- Обработка сообщений ---
+// --- Обработка входящих сообщений ---
 bot.on("message:text", async (ctx) => {
   const lang = ctx.session.lang || "ru";
   const question = ctx.message.text.trim();
@@ -83,28 +83,44 @@ bot.on("message:text", async (ctx) => {
     if (data?.choices?.[0]?.message?.content) {
       await ctx.reply(data.choices[0].message.content);
     } else {
-      await ctx.reply(lang === "ru" ? "Ошибка при получении ответа." : lang === "kz" ? "Жауап алу кезінде қате." : "Error retrieving the answer.");
+      await ctx.reply(
+        lang === "ru"
+          ? "Ошибка при получении ответа."
+          : lang === "kz"
+          ? "Жауап алу кезінде қате."
+          : "Error retrieving the answer."
+      );
     }
   } catch (err) {
     console.error(err);
-    await ctx.reply(lang === "ru" ? "Произошла ошибка." : lang === "kz" ? "Қате пайда болды." : "An error occurred.");
+    await ctx.reply(
+      lang === "ru"
+        ? "Произошла ошибка."
+        : lang === "kz"
+        ? "Қате пайда болды."
+        : "An error occurred."
+    );
   }
 });
 
+// --- Vercel ---
+let isBotInited = false;
+
 export default async function handler(req, res) {
-  if (!bot.botInfo) {
-    await bot.init(); 
+  if (!isBotInited) {
+    await bot.init();
+    isBotInited = true;
   }
 
   if (req.method === "POST") {
     try {
       await bot.handleUpdate(req.body);
-      res.status(200).send("OK");
+      return res.status(200).send("OK");
     } catch (err) {
       console.error(err);
-      res.status(500).send("Error");
+      return res.status(500).send("Error");
     }
-  } else {
-    res.status(200).send("Bot is running");
   }
+
+  return res.status(200).send("Bot is running");
 }
