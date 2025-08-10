@@ -92,7 +92,7 @@ bot.on("message:text", async (ctx) => {
 });
 
 // --- Экспорт для Vercel ---
-module.exports = async (req, res) => {
+export default bot = async (req, res) => {
   if (req.method === "POST") {
     try {
       await bot.handleUpdate(req.body);
