@@ -1,7 +1,7 @@
 import { Bot, InlineKeyboard, Keyboard, session } from "grammy";
 import fetch from "node-fetch";
 
-const BOT_TOKEN = process.env.BOT_TOKEN; // Telegram BotFather
+const BOT_TOKEN = process.env.BOT_TOKEN; // Telegram BotFather // NEW 
 const DEEPSEEK_API_KEY = process.env.DEEPSEEK_API_KEY; // DeepSeek API
 
 if (!BOT_TOKEN) throw new Error("BOT_TOKEN is required");
